@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: nexuslearn-postgres-dev
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=nexuslearn
+      - POSTGRES_USER=nexuslearn
+      - POSTGRES_PASSWORD=nexuslearn_secret
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nexuslearn -d nexuslearn"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: nexuslearn-redis-dev
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+
+  livekit:
+    image: livekit/livekit-server:latest
+    container_name: nexuslearn-livekit-dev
+    ports:
+      - "7880:7880"
+      - "7881:7881"
+      - "7882:7882/udp"
+    command: >
+      --config /etc/livekit.yaml
+      --dev
+
+volumes:
+  postgres_dev_data:
